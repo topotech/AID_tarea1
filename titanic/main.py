@@ -83,5 +83,23 @@ plt.show()
 
 print " =============================================================== \n =============================================================== \n"
 
+print "Edad promedio de sobrevivientes y muertos"
+print data.groupby('Survived')['Age'].mean()
+print ""
 
+print "Cargando boxplots e histograma edad vs supervivencia..."
+data.boxplot(column='Age',by='Survived')
+data.hist(column='Age',by='Survived')
+print "Renderizando plots..."
+plt.show()
+
+print "-----\nCantidad de muertos agrupados por conocimiento de edad:"
+print "Desconocida:\t" + str(sum(data[data.Survived==0]['Age'].isnull()))
+print "Conocida:\t\t" + str(sum(data[data.Survived==0]['Age'].notnull()))
+
+
+print "\nDatos de persona más vieja:"
+print data[data.Age==data['Age'].max()]
+
+print " =============================================================== \n =============================================================== \n"
 
