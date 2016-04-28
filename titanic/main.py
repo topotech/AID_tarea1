@@ -2,6 +2,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 #Parte a)
@@ -163,6 +164,8 @@ print " =============================================================== \n =====
 
 #Parte h)
 
+print "Predicción con Regla 1 (sobreviven todos los de 1º clase y las mujeres de 2º):"
+
 data['prediction'] = 0
 
 #Se predice supervivencia de mujeres y primera clase. Si es mujer y de tercera, se rectifica a 0.
@@ -170,10 +173,117 @@ data.loc[(data.Sex == 'female') | (data.Pclass == 1), 'prediction'] = 1
 
 
 
-print "Porcentaje de falsos positivos (se creyeron vivos pero murieron):\n" + \
-      str(data[data.prediction == 1][data.Survived == 0].size/float(data[data.prediction == 1].size))
+print "Precisión:\n" + \
+      str(data[data.prediction == 1][data.Survived == 1].size/float(data[data.prediction == 1].size))
 
-print "Porcentaje de falsos negativos (se creyeron muertos, pero sobrevieron):\n" + \
-      str(data[data.prediction == 0][data.Survived == 1].size/float(data[data.Survived == 1].size))
+print "Recall\n" + \
+      str(data[data.prediction == 1][data.Survived == 1].size/float(data[data.Survived == 1].size))
 
 data.to_csv('predicciones-titanic.csv')
+
+
+print " =============================================================== \n =============================================================== \n"
+
+#Parte i)
+
+print "Nuevo análisis particionando en 5 clases según costo de pasaje:"
+
+_, myBP = data.boxplot(column='Fare', return_type='both')
+whiskers = [whiskers.get_ydata() for whiskers in myBP["whiskers"]]
+
+print "Rango de datos relevantes: ["+str(whiskers[0][1])+","+str(whiskers[1][1])+"]" # Imprime  [bigote_inf,bigote_sup]
+# De la impresión anterior se concluye que los outliers están sobre 65.0
+
+dataFareTyp = data[ data.Fare <= whiskers[1][1] ].copy()
+dataFareTyp.hist(column='Fare')
+plt.show()
+
+
+# Analisis de datos
+
+dataFareTypSurv = data[(data.Fare <= whiskers[1][1]) & (data.Survived == 1)]
+dataFareTypDied = data[(data.Fare <= whiskers[1][1]) & (data.Survived == 0)]
+fig, ax = plt.subplots()
+
+sns.distplot(dataFareTypSurv['Fare'], bins=[0, 10, 20, 30, 40, 65] ) #Curva pequeña
+sns.distplot(dataFareTypDied['Fare'], bins=[0, 10, 20, 30, 40, 65] ) #Curva alta
+
+#Muestra nuevo histograma con las nuevas "clases"
+plt.show()
+
+#Se usa dataFareTyp para definir nuevo criterio de clasificación económica
+
+
+dataFareTyp.loc[(dataFareTyp.Fare >= 0) & (dataFareTyp.Fare < 10), 'Pclass'] = 5
+dataFareTyp.loc[(dataFareTyp.Fare >= 10) & (dataFareTyp.Fare < 20), 'Pclass'] = 4
+dataFareTyp.loc[(dataFareTyp.Fare >= 20) & (dataFareTyp.Fare < 30), 'Pclass'] = 3
+dataFareTyp.loc[(dataFareTyp.Fare >= 30) & (dataFareTyp.Fare < 40), 'Pclass'] = 2
+dataFareTyp.loc[(dataFareTyp.Fare >= 40) , 'Pclass'] = 1
+
+# Se usa dataFareTyp para definir nuevo criterio de clasificación
+# Tras observar el histograma, se define que los muertos serán todos de 5º clase...
+
+print "Predicción con Regla 2 (Se salvan todos menos 5º clase):"
+
+dataFareTyp['prediction'] = 1
+data.loc[(data.Pclass == 5) , 'prediction'] = 0
+
+
+print "Precisión:\n" + \
+      str(dataFareTyp[dataFareTyp.prediction == 1][dataFareTyp.Survived == 1].size/float(dataFareTyp[dataFareTyp.prediction == 1].size))
+
+print "Recall\n" + \
+      str(dataFareTyp[dataFareTyp.prediction == 1][dataFareTyp.Survived == 1].size/float(dataFareTyp[dataFareTyp.Survived == 1].size))
+
+
+
+print " =============================================================== \n =============================================================== \n"
+
+#Parte j)
+
+print "Se ponen a prueba las dos reglas de predicción sobre los datos de testing:\n"
+
+
+data = pd.read_csv('data/titanic-test.csv', sep=',')
+survival = pd.read_csv('data/titanic-gendermodel.csv', sep=',')
+
+data = data.merge(survival,on='PassengerId').copy()
+
+regla1 = data.copy()
+regla2 = data.copy()
+
+
+
+regla1['prediction'] = 0
+regla1.loc[(regla1.Sex == 'female') | (regla1.Pclass == 1), 'prediction'] = 1
+
+
+regla2['prediction'] = 1
+regla2.loc[regla2.Fare < 10 , 'prediction'] = 0
+
+
+print "\nRegla 1\n-------"
+
+print "\tPrecisión:\n\t" + \
+      str(regla1[regla1.prediction == 1][regla1.Survived == 1].size/float(regla1[regla1.prediction == 1].size))
+
+print "\n\tRecall:\n\t" + \
+      str(regla1[regla1.prediction == 1][regla1.Survived == 1].size/float(regla1[regla1.Survived == 1].size)) + "\n"
+
+
+print "\nRegla 2\n-------"
+
+print "\tPrecisión:\n\t" + \
+      str(regla2[regla2.prediction == 1][regla2.Survived == 1].size/float(regla2[regla2.prediction == 1].size))
+
+print "\n\tRecall:\n\t" + \
+      str(regla2[regla2.prediction == 1][regla2.Survived == 1].size/float(regla2[regla2.Survived == 1].size))
+
+
+
+regla1['prediction'] = 0
+regla1.loc[(regla1.Sex == 'female') | (regla1.Pclass == 1), 'prediction'] = 1
+
+
+regla2['prediction'] = 1
+regla2.loc[(regla2.Pclass == 5) , 'prediction'] = 0
