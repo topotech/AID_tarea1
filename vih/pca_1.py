@@ -76,7 +76,7 @@ data_2d.columns = ['PC1','PC2']
 row_means = data_2d.mean(axis=1)
 
 #Variacion de los row
-row_trends = data_2d.diff(axis=1).mean(axis=1)
+row_trends = data_2d.diff().mean(axis=1)
 #grafico de las medias
 data_2d.plot(kind='scatter', x='PC1', y='PC2', figsize=(16,8), c=row_means,cmap='hot')
 plt.xlabel('Principal Component 1')
@@ -85,7 +85,7 @@ plt.ylabel('Principal Component 2')
 
 #GRafico de la variacion
 row_means = data.mean(axis=1)
-row_trends = data.diff(axis=1).mean(axis=1)
+row_trends = data.diff().mean(axis=1)
 data_2d.plot(kind='scatter', x='PC1', y='PC2', figsize=(16,8), c=row_trends,cmap='PRGn')
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
@@ -98,7 +98,7 @@ c=row_means,cmap='PRGn')
 #Pregunta g
 fig, ax = plt.subplots(figsize=(16,8))
 row_means = data.mean(axis=1)
-row_trends = data.diff(axis=1).mean(axis=1)
+row_trends = data.diff().mean(axis=1)
 data_2d.plot(kind='scatter', x='PC1', y='PC2', ax=ax, s=10*row_means, c=row_means, \
 cmap='PRGn')
 Q3_HIV_world = data.mean(axis=1).quantile(q=0.85)
