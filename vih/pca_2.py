@@ -11,14 +11,8 @@ data.columns.names = ['year']
 X = data.ix[:,'1990':'2007'].values
 X_std = StandardScaler().fit_transform(X)
 
-fig, ax = plt.subplots(figsize=(8, 4))
-data.loc[['Chile','Argentina','Bolivia','United States','Italy', 'United Kingdom', 'Sweden','Zimbabwe','Zambia','Cameroon', 'Congo, Rep,', 'Turkey', 'Singapore', 'Thailand', 'Australia', ''],'1990':].T.plot(ax=ax)
-ax.legend(loc='upper left', bbox_to_anchor=(0.1, 1.1),prop={'size':'x-small'},ncol=6)
-plt.tight_layout(pad=1.5)
-
-
 #pregunta d
-#Se calcula los vectores medios por columnas (son 18 columnas) y se calcula la matriz de la covarizana como el producto punto  X^T*X/n-1
+#Se calcula los vectores medios por columnas (son 22 columnas) y se calcula la matriz de la covarizana como el producto punto  X^T*X/n-1
 mean_vec = np.mean(X_std, axis=0)
 cov_mat = (X_std - mean_vec).T.dot((X_std - mean_vec)) / (X_std.shape[0]-1)
 #Se obtienen valores y vectores propios
@@ -53,7 +47,7 @@ matrix_w = np.hstack((eig_pairs[0][1].reshape(18,1),
 #Se hace el producto punto entre la matriz X normalizada y la matriz con la cantidad de vectores propios seleccionados
 Y_sklearn = X_std.dot(matrix_w)
 
-#Se hace un nuevo dataframe a partir de la matriz con solo dos variables en las cuales se proyectaron las 22
+#Se hace un nuevo dataframe a partir de la matriz con solo dos variables en las cuales se proyectaron las 18
 data_2d = pd.DataFrame(Y_sklearn)
 data_2d.index = data.index
 data_2d.columns = ['PC1','PC2']
@@ -88,11 +82,11 @@ row_means = data.mean(axis=1)
 row_trends = data.diff().mean(axis=1)
 data_2d.plot(kind='scatter', x='PC1', y='PC2', ax=ax, s=10*row_means, c=row_means, \
 cmap='PRGn')
-Q3_HIV_world = data.mean(axis=1).quantile(q=0.85)
-HIV_country = data.mean(axis=1)
+Q3_TB_world = data.mean(axis=1).quantile(q=0.85)
+TB_country = data.mean(axis=1)
 names = data.index
 for i, txt in enumerate(names):
-	if(HIV_country[i]>Q3_HIV_world):
+	if(TB_country[i]>Q3_TB_world):
 		ax.annotate(txt, (data_2d.iloc[i].PC1+0.2,data_2d.iloc[i].PC2))
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
