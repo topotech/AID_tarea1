@@ -18,7 +18,7 @@ plt.tight_layout(pad=1.5)
 
 
 #pregunta d
-#Se calcula los vectores medios por columnas (son 22 columnas) y se calcula la matriz de la covarizana como el producto punto  X^T*X/n-1
+#Se calcula los vectores medios por columnas (son 18 columnas) y se calcula la matriz de la covarizana como el producto punto  X^T*X/n-1
 mean_vec = np.mean(X_std, axis=0)
 cov_mat = (X_std - mean_vec).T.dot((X_std - mean_vec)) / (X_std.shape[0]-1)
 #Se obtienen valores y vectores propios
